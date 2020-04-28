@@ -8,15 +8,15 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>APUE学习笔记-第八章《进程控制》 | zthhhh</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="进程进程ID​        每个进程都有一个非负整数表示的唯一进程ID。但是进程ID可复用，当进程结束后，该进程ID即可复用，但是Unix系统使用延迟算法，">
+  <meta name="description" content="进程ID​        每个进程都有一个非负整数表示的唯一进程ID。但是进程ID可复用，当进程结束后，该进程ID即可复用，但是Unix系统使用延迟算法，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="APUE学习笔记-第八章《进程控制》">
 <meta property="og:url" content="http://yoursite.com/2020/04/26/APUE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E7%AC%AC%E5%85%AB%E7%AB%A0%E3%80%8A%E8%BF%9B%E7%A8%8B%E6%8E%A7%E5%88%B6%E3%80%8B/index.html">
 <meta property="og:site_name" content="zthhhh">
-<meta property="og:description" content="进程进程ID​        每个进程都有一个非负整数表示的唯一进程ID。但是进程ID可复用，当进程结束后，该进程ID即可复用，但是Unix系统使用延迟算法，">
+<meta property="og:description" content="进程ID​        每个进程都有一个非负整数表示的唯一进程ID。但是进程ID可复用，当进程结束后，该进程ID即可复用，但是Unix系统使用延迟算法，">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-04-26T06:29:45.000Z">
-<meta property="article:modified_time" content="2020-04-26T12:27:42.456Z">
+<meta property="article:modified_time" content="2020-04-28T09:18:15.864Z">
 <meta property="article:author" content="zthhhh">
 <meta property="article:tag" content="Unix">
 <meta name="twitter:card" content="summary">
@@ -167,13 +167,16 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h1><h2 id="进程ID"><a href="#进程ID" class="headerlink" title="进程ID"></a>进程ID</h2><p>​        每个进程都有一个非负整数表示的唯一进程ID。但是进程ID可复用，当进程结束后，该进程ID即可复用，但是Unix系统使用延迟算法，<a id="more"></a>防止将新进程误认为是之前已经结束的进程。同时，Unix系统中有一些专用进程，例如进程ID为0的进程一般是调度进程，是一个内核进程，进程ID为1的进程一般是init进程，是一个以超级用户执行的用户进程。除了进程ID，进程还有其他的标识符，例如父进程ID，实际用户ID，有效用户ID，实际组ID，有效组ID。Unix系统提供了函数来返回他们。</p>
-<h2 id="子进程"><a href="#子进程" class="headerlink" title="子进程"></a>子进程</h2><p>​      一个进程可以通过fork函数创建一个子进程。</p>
+        <h1 id="进程ID"><a href="#进程ID" class="headerlink" title="进程ID"></a>进程ID</h1><p>​        每个进程都有一个非负整数表示的唯一进程ID。但是进程ID可复用，当进程结束后，该进程ID即可复用，但是Unix系统使用延迟算法，<a id="more"></a>防止将新进程误认为是之前已经结束的进程。同时，Unix系统中有一些专用进程，例如进程ID为0的进程一般是调度进程，是一个内核进程，进程ID为1的进程一般是init进程，是一个以超级用户执行的用户进程。除了进程ID，进程还有其他的标识符，例如父进程ID，实际用户ID，有效用户ID，实际组ID，有效组ID。Unix系统提供了函数来返回他们。</p>
+<h1 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h1><h2 id="fork"><a href="#fork" class="headerlink" title="fork()"></a>fork()</h2><p>​      一个进程可以通过fork函数创建一个子进程。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">fork</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"><span class="comment">//子进程返回0，父进程返回子进程ID，若出错，返回0.</span></span><br></pre></td></tr></table></figure>
 <p>​       子进程和父进程继续执行fork调用后的代码，子进程拥有父进程的一个副本，包括堆栈，数据空间，但是，两个进程共享正文段。但是现在的实现里一般不完全复制一个副本，而采用写时复制技术。    父进程和子进程共享一个数据区域，且权限都为只读。当父进程和子进程试图修改内容时，由内核创建一个修改部分的副本。</p>
-<h3 id="文件共享"><a href="#文件共享" class="headerlink" title="文件共享"></a>文件共享</h3><p>​       文件共享是子进程的一个特性，即父进程所有打开文件的文件描述符都复制到子进程中。即两个进程维护各自的文件描述符表，文件表项具有相同的文件描述符，且指针指向相同的文件表项。父进程和子进程拥有相同的文件偏移量， 例如子进程和父进程都需要写到标准也由子进程输出且子进程先执行，子进程完成输出后，父进程的标准输出的文件偏移量更新，得以继续输出。否则就会造成输出混乱。同时父进程的很多其他属性也由子进程继承。</p>
+<p>   fork()有两种用法，<br>   一种是父进程复制自己，使得父进程和子进程执行不同的代码段，例如网络服务进程中，父进程等待一个客户端的请求，收到请求后，调用fork()，让子进程执行。<br>   另一种是一个进程要执行另一个程序，这种情况下，调用fork()后要调用exec()。</p>
+<h2 id="文件共享"><a href="#文件共享" class="headerlink" title="文件共享"></a>文件共享</h2><p>​       文件共享是子进程的一个特性，即父进程所有打开文件的文件描述符都复制到子进程中。即两个进程维护各自的文件描述符表，文件表项具有相同的文件描述符，且指针指向相同的文件表项。父进程和子进程拥有相同的文件偏移量， 例如子进程和父进程都需要写到标准也由子进程输出且子进程先执行，子进程完成输出后，父进程的标准输出的文件偏移量更新，得以继续输出。否则就会造成输出混乱。同时父进程的很多其他属性也由子进程继承。</p>
 <p>​       子进程对父进程文件描述符的处理有两种，第一种，两个进程执行相同的程序段，父进程对文件描述符不需要进行处理，子进程结束后，更新父进程读写的各文件的偏移量。第二种，两个进程执行不同的程序段，子进程关闭不需要使用的文件描述符,这样他们互不影响。</p>
-<h3 id="子进程和父进程的区别"><a href="#子进程和父进程的区别" class="headerlink" title="子进程和父进程的区别"></a>子进程和父进程的区别</h3><p>​            </p>
+<h2 id="vfork"><a href="#vfork" class="headerlink" title="vfork()"></a>vfork()</h2><p>​       和fork的区别是，vfork保证子进程先运行，子进程调用exit或exec后父进程才可能被调度运行。且vfork函数创建一个新进程的目的是为了exec一个新程序。但是它不将父进程的地址空间完全复制到子进程中，因为子进程会立即调用exit或exec所以不会用到父进程的地址空间。在exit或exec前，子进程在父进程的地址空间中运行，详见APUE图8-3.</p>
+<h2 id="wait-和waitpid"><a href="#wait-和waitpid" class="headerlink" title="wait()和waitpid()"></a>wait()和waitpid()</h2><p>   APUE7.3节中提到了进程的几种终止方式，父进程为了知道子进程是如何退出的，子进程的exit，_exit,_Exit将退出状态作为参数传递给函数。异常终止时，内核产生一个指示异常终止原因的终止状态。这样，父进程就可以用wait或waitpid函数取得其终止状态。因此，子进程结束后，内核会为子进程保存一些信息，当被父进程调用wait或waitpid函数后，才完全释放，如果不被释放，该进程称为僵尸(zombies)进程。<br>   如果父进程在子进程终止前终止，那么子进程被init进程接管。init进程不会产生僵尸进程。因为这可以防止系统被僵尸进程塞满。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">wait</span><span class="params">(<span class="keyword">int</span> *statloc)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">waitpid</span><span class="params">(<span class="keyword">pid_t</span> pid,<span class="keyword">int</span> &amp;statloc,<span class="keyword">int</span> options)</span></span>;</span><br><span class="line"><span class="comment">//</span></span><br></pre></td></tr></table></figure>
 
       
 
